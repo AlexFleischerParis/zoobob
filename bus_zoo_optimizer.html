@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Zoo Trip Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .bus-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bus-title {
+            grid-column: 1 / -1;
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-item strong {
+            font-weight: 700;
+        }
+
+        .total-cost {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .bus-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚌 Bus Zoo Trip Optimizer</h1>
+        <p class="subtitle">Calculate the optimal number of buses for minimal cost</p>
+
+        <div class="input-section">
+            <div class="bus-section">
+                <div class="bus-title">Bus Type 1 (Small)</div>
+                <div class="input-group">
+                    <label for="bus1-capacity">Capacity (kids)</label>
+                    <input type="number" id="bus1-capacity" min="1" value="40" placeholder="e.g., 40">
+                </div>
+                <div class="input-group">
+                    <label for="bus1-price">Price ($)</label>
+                    <input type="number" id="bus1-price" min="0" step="0.01" value="500" placeholder="e.g., 500">
+                </div>
+            </div>
+
+            <div class="bus-section">
+                <div class="bus-title">Bus Type 2 (Large)</div>
+                <div class="input-group">
+                    <label for="bus2-capacity">Capacity (kids)</label>
+                    <input type="number" id="bus2-capacity" min="1" value="60" placeholder="e.g., 60">
+                </div>
+                <div class="input-group">
+                    <label for="bus2-price">Price ($)</label>
+                    <input type="number" id="bus2-price" min="0" step="0.01" value="700" placeholder="e.g., 700">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="total-kids">Total Number of Kids</label>
+                <input type="number" id="total-kids" min="1" value="150" placeholder="e.g., 150">
+            </div>
+        </div>
+
+        <button onclick="calculateOptimalBuses()">Calculate Optimal Solution</button>
+
+        <div id="result" class="result">
+            <h2>📊 Optimal Solution</h2>
+            <div id="result-content"></div>
+        </div>
+
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        function calculateOptimalBuses() {
+            // Get input values
+            const bus1Capacity = parseInt(document.getElementById('bus1-capacity').value);
+            const bus1Price = parseFloat(document.getElementById('bus1-price').value);
+            const bus2Capacity = parseInt(document.getElementById('bus2-capacity').value);
+            const bus2Price = parseFloat(document.getElementById('bus2-price').value);
+            const totalKids = parseInt(document.getElementById('total-kids').value);
+
+            // Hide previous results
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+
+            // Validate inputs
+            if (isNaN(bus1Capacity) || isNaN(bus1Price) || isNaN(bus2Capacity) || 
+                isNaN(bus2Price) || isNaN(totalKids)) {
+                showError('Please fill in all fields with valid numbers.');
+                return;
+            }
+
+            if (bus1Capacity <= 0 || bus2Capacity <= 0 || totalKids <= 0) {
+                showError('Capacity and number of kids must be greater than 0.');
+                return;
+            }
+
+            if (bus1Price < 0 || bus2Price < 0) {
+                showError('Prices cannot be negative.');
+                return;
+            }
+
+            // Calculate optimal solution
+            let minCost = Infinity;
+            let optimalBus1 = 0;
+            let optimalBus2 = 0;
+
+            // Try all possible combinations
+            const maxBus1 = Math.ceil(totalKids / bus1Capacity);
+            const maxBus2 = Math.ceil(totalKids / bus2Capacity);
+
+            for (let b1 = 0; b1 <= maxBus1; b1++) {
+                for (let b2 = 0; b2 <= maxBus2; b2++) {
+                    const totalCapacity = b1 * bus1Capacity + b2 * bus2Capacity;
+                    
+                    // Check if this combination can transport all kids
+                    if (totalCapacity >= totalKids) {
+                        const cost = b1 * bus1Price + b2 * bus2Price;
+                        
+                        if (cost < minCost) {
+                            minCost = cost;
+                            optimalBus1 = b1;
+                            optimalBus2 = b2;
+                        }
+                    }
+                }
+            }
+
+            // Display results
+            const totalCapacity = optimalBus1 * bus1Capacity + optimalBus2 * bus2Capacity;
+            const extraSeats = totalCapacity - totalKids;
+
+            const resultContent = `
+                <div class="result-item">
+                    <strong>Bus Type 1 (Small):</strong> ${optimalBus1} bus${optimalBus1 !== 1 ? 'es' : ''} 
+                    (${optimalBus1 * bus1Capacity} seats)
+                </div>
+                <div class="result-item">
+                    <strong>Bus Type 2 (Large):</strong> ${optimalBus2} bus${optimalBus2 !== 1 ? 'es' : ''} 
+                    (${optimalBus2 * bus2Capacity} seats)
+                </div>
+                <div class="result-item">
+                    <strong>Total Buses:</strong> ${optimalBus1 + optimalBus2}
+                </div>
+                <div class="result-item">
+                    <strong>Total Capacity:</strong> ${totalCapacity} seats
+                </div>
+                <div class="result-item">
+                    <strong>Kids to Transport:</strong> ${totalKids}
+                </div>
+                <div class="result-item">
+                    <strong>Extra Seats:</strong> ${extraSeats}
+                </div>
+                <div class="total-cost">
+                    💰 Total Cost: $${minCost.toFixed(2)}
+                </div>
+            `;
+
+            document.getElementById('result-content').innerHTML = resultContent;
+            document.getElementById('result').classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateOptimalBuses();
+            }
+        });
+    </script>
+</body>
+</html>
